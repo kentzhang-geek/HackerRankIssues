@@ -1,99 +1,87 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <map>
 
-using namespace std;
-
-void swapInt(int &a, int &b) {
-    int tmp = a;
-    a = b;
-    b = tmp;
-    return;
+bool isClamp(int v, int minv, int maxv) {
+    return (v >= minv) && (v <= maxv);
 }
 
-bool checkMatrixRow(int rowNum, vector<vector<int>> &matrix) {
-    size_t matrixSize = matrix.size();
-    int sumLeft = 0;
-    int sumRight = 0;
-    for (size_t columnIdx = 0; columnIdx < matrixSize; columnIdx++) {
-        if (columnIdx < (matrixSize / 2)) {
-            sumLeft += matrix[rowNum][columnIdx];
-        } else {
-            sumRight += matrix[rowNum][columnIdx];
+bool check(std::string &s, int posa, int posb) {
+    char a = s[posa];
+    char b = s[posb];
+
+    if (!isClamp(posa, 0, s.length() - 1)
+    || !isClamp(posb, 0, s.length() -1))
+        return false;
+    if (s[posa] == s[posb])
+        return true;
+    else
+        return false;
+}
+
+bool checkPalidrome(std::string &s, int posa, int posb) {
+    while (posa < posb) {
+        if (check(s, posa, posb)) {
+            posa++;
+            posb--;
+        }
+        else {
+            return false;
         }
     }
-    return sumLeft > sumRight;
+    return true;
 }
 
-bool checkMatrixColumn(int colNum, vector<vector<int>> &matrix) {
-    size_t matrixSize = matrix.size();
-    int sumTop = 0;
-    int sumBottom = 0;
-    for (size_t rowIdx = 0; rowIdx < matrixSize; rowIdx++) {
-        if (rowIdx < (matrixSize / 2)) {
-            sumTop += matrix[rowIdx][colNum];
-        } else {
-            sumBottom += matrix[rowIdx][colNum];
-        }
-    }
-    return sumTop > sumBottom;
-}
-
-void swapColumn(int colNum, vector<vector<int>> &matrix) {
-    for (size_t i = 0; i < matrix.size() / 2; i++) {
-        swap(matrix[i][colNum], matrix[matrix.size() - 1 - i][colNum]);
-    }
-}
-
-void swapRow(int rowNum, vector<vector<int>> &matrix) {
-    for (size_t i = 0; i < matrix.size() / 2; i++) {
-        swap(matrix[rowNum][i], matrix[rowNum][matrix.size() - 1 - i]);
-    }
-}
-
-int flippingMatrix(vector<vector<int>> matrix) {
-    bool condition = true;
-    bool check = false;
-    while (condition) {
-        condition = false;
-        for (size_t i = 0; i < matrix.size(); i++) {
-            check = !checkMatrixRow(i, matrix);
-            if (check) {
-                swapRow(i, matrix);
+int removeOneToPalindrome(std::string s) {
+    int posa = 0;
+    int posb = s.length() - 1;
+    int pos = -1;
+    while (posa < posb) {
+        if (check(s, posa, posb)) {
+            posa++;
+            posb--;
+        }else {
+            bool checkleft = check(s, posa + 1, posb);
+            bool checkright = check(s, posa, posb - 1);
+            if (checkleft) {
+                pos = posa;
+                if (checkPalidrome(s, posa + 1, posb))
+                    return pos;
             }
-            condition = condition || check;
-        }
-        for (int i = 0; i < matrix.size(); i++) {
-            check = !checkMatrixColumn(i, matrix);
-            if (check) {
-                swapColumn(i, matrix);
+            if (checkright) {
+                pos = posb;
+                if (checkPalidrome(s, posa, posb - 1))
+                    return pos;
             }
-            condition = condition || check;
+            return -1;
         }
     }
-    long int sum = 0;
-    for (int i = 0; i < matrix.size() / 2; i++) {
-        for (int j = 0; j < matrix.size() / 2; j++) {
-            sum += matrix[i][j];
-        }
-    }
-    for (auto row : matrix) {
-        for (auto cell : row) {
-            std::cout << cell << ", ";
-        }
-        std::cout << std::endl;
-    }
-    return sum;
+    return pos;
 }
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    vector<vector<int>> matrix = {
-            {112, 42,  83,  119},
-            {56,  125, 56,  49},
-            {15,  78,  101, 43},
-            {62,  98,  114, 108},
-    };
-    int res = flippingMatrix(matrix);
-    printf("%d\n", res);
+    std::string s = "qerpiupiucva";
+    std::string target = s;
+    for (char x : s) {
+        target.insert(0, 1, x);
+    }
+    target.insert(16, 1, 'm');
+    std::cout << removeOneToPalindrome(target) << std::endl;
+    std::cout << removeOneToPalindrome("") << std::endl;
+    std::cout << removeOneToPalindrome("aa") << std::endl;
+    std::cout << removeOneToPalindrome("ab") << std::endl;
+    std::cout << removeOneToPalindrome("aba") << std::endl;
+    std::cout << removeOneToPalindrome("abab") << std::endl;
+    std::cout << removeOneToPalindrome("ababa") << std::endl;
+    std::cout << removeOneToPalindrome("abba") << std::endl;
+    std::cout << removeOneToPalindrome("hgygsvlfcwnswtuhmyaljkqlqjjqlqkjlaymhutwsnwcwflvsgygh") << std::endl;
+    std::string x = "hgygsvlfcwnswtuhmyaljkqlqjjqlqkjlaymhutwsnwcwflvsgygh";
+    std::cout << x << std::endl;
+    x.erase(44, 1);
+    std::cout << x << std::endl;
+    std::reverse(x.begin(), x.end());
+    std::cout << x << std::endl;
+
     return 0;
 }
