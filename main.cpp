@@ -24,18 +24,20 @@ int truckTour(std::vector<std::vector<int>> petrolpumps) {
         int petrolRemainsOnNext = ppair[0] - ppair[1];
         petrolRemainOnNextStop.push_back(petrolRemainsOnNext);
     }
-    for (int startPos = 0; startPos < petrolRemainOnNextStop.size(); startPos++) {
-        long int balance = 0;
-        for (int i = startPos; i < petrolRemainOnNextStop.size(); i++) {
-            balance += petrolRemainOnNextStop[i];
-            if (balance < 0)
-                break;
+    int visitedPumps = 0;
+    int pos = 0;
+    int balance = 0;
+    while (visitedPumps < petrolRemainOnNextStop.size()) {
+        balance += petrolRemainOnNextStop[pos];
+        pos = (pos + 1) % petrolRemainOnNextStop.size();
+        if (balance < 0) {
+            visitedPumps = 0;
+            balance = 0;
+        } else {
+            visitedPumps++;
         }
-        if (balance > 0)
-            return startPos;
     }
-
-    return 0;
+    return pos;
 }
 
 int main() {
