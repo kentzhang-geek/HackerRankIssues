@@ -5,77 +5,76 @@
 #include <algorithm>
 using namespace std;
 
-class Queue {
-    std::vector<int> enqueue_vector;
-    std::vector<int> dequeue_vector;
-    enum {
-        enqueue = 0,
-        dequeue
-    } state = enqueue;
-public:
-    Queue() {};
-    void enque(int v) {
-        if (state == enqueue) {
-            enqueue_vector.push_back(v);
-        } else {
-            while (!dequeue_vector.empty()) {
-                enqueue_vector.push_back(dequeue_vector.back());
-                dequeue_vector.pop_back();
-            }
-            state = enqueue;
-            enqueue_vector.push_back(v);
-        }
-    }
-    int deque() {
-        if (state == dequeue) {
-            int ret = dequeue_vector.back();
-            dequeue_vector.pop_back();
-            return ret;
-        } else {
-            while (!enqueue_vector.empty()) {
-                dequeue_vector.push_back(enqueue_vector.back());
-                enqueue_vector.pop_back();
-            }
-            int ret = dequeue_vector.back();
-            dequeue_vector.pop_back();
-            state = dequeue;
-            return ret;
-        }
-        return 0;
-    }
-    int front() {
-        if (state == enqueue)
-            return enqueue_vector.front();
-        else
-            return dequeue_vector.back();
-    }
-};
+/*
+ * Complete the 'isBalanced' function below.
+ *
+ * The function is expected to return a STRING.
+ * The function accepts STRING s as parameter.
+ */
 
+string isBalanced(string s) {
+    std::vector<char> brackets;
+    for (char c : s) {
+        switch (c) {
+            case '[':
+            case '{':
+            case '(': {
+                brackets.push_back(c);
+                break;
+            }
+            case ']':
+            {
+                if (brackets.empty())
+                    return "NO";
+                if (brackets.back() != '[') {
+                    return "NO";
+                }
+                brackets.pop_back();
+                break;
+            }
+            case '}':
+            {
+                if (brackets.empty())
+                    return "NO";
+                if (brackets.back() != '{') {
+                    return "NO";
+                }
+                brackets.pop_back();
+                break;
+            }
+            case ')':
+            {
+                if (brackets.empty())
+                    return "NO";
+                if (brackets.back() != '(') {
+                    return "NO";
+                }
+                brackets.pop_back();
+                break;
+            }
+        }
+    }
+    if (brackets.empty())
+    return "YES";
+    else
+        return "NO";
+}
 
 int main() {
-    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
+    string res = isBalanced("{[()]}");
     string buf;
     std::getline(std::cin, buf);
-    int num = std::stoi(buf);
-    Queue q;
+    int num = 0;
+    std::sscanf(buf.c_str(), "%d", &num);
+    std::vector<string> inputs;
     while (num--) {
         std::getline(std::cin, buf);
-        int cmd, v;
-        std::sscanf(buf.c_str(), "%d %d", &cmd, &v);
-        switch (cmd) {
-            case 1: {
-                q.enque(v);
-                break;
-            }
-            case 2: {
-                q.deque();
-                break;
-            }
-            case 3: {
-                printf("%d\n", q.front());
-                break;
-            }
-        }
+        inputs.push_back(buf);
+    }
+    int idx = 0;
+    for (auto ins : inputs) {
+        res = isBalanced(ins);
+        std::cout << idx++ << res << " <= " << ins << std::endl;
     }
     return 0;
 }
