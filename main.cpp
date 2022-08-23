@@ -8,87 +8,102 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <map>
 using namespace std;
 
-class CMD {
-public:
-    int command_id = -1;
-    virtual void Do(std::string &buf) = 0;
-    virtual void Undo(std::string &buf) = 0;
-};
 
-class Append : public CMD{
-public:
-    Append(std::string _s) : s(_s) {
 
+/*
+ * Complete the 'legoBlocks' function below.
+ *
+ * The function is expected to return an INTEGER.
+ * The function accepts following parameters:
+ *  1. INTEGER n
+ *  2. INTEGER m
+ */
+#define MOD 1000000007
+std::vector<long long int> patternAcc;
+
+long long int sum(std::vector<long long int> & arr, long long int s, long long int n) {
+    long long int ret = 0;
+    for (long long int i = 0; i < n;i++) {
+        ret += arr[s + i];
     }
-    void Do(string &buf) override {
-        buf.append(this->s);
-    }
+    return ret;
+}
 
-    void Undo(string &buf) override {
-        buf.erase(buf.size() - s.size(), s.size());
-    }
-    std::string s;
-};
-
-class RemoveLast : public CMD {
-public:
-    RemoveLast(int _n) : n(_n) {}
-
-    void Do(string &buf) override {
-        this->n = std::min(this->n, (int)buf.size());
-        this->backup = buf.substr(buf.size() - this->n, this->n);
-        buf.erase(buf.size() - this->n, this->n);
-    }
-
-    void Undo(string &buf) override {
-        buf.append(this->backup);
+long long int tetranacci(long long int n) {
+    std::vector<long long int> arr = {1,2,4,8};
+    if (n <= 4) {
+        long long int sum = 1;
+        for (long long int i = 0; i < n; i++) {
+            sum *= arr[i];
+        }
+        return sum;
     }
 
-    int n;
-    std::string backup;
-};
+    for (long long int i = 4; i <= n; i++) {
+        arr.push_back(sum(arr, i - 4, 4));
+    }
+    long long int ret = 0;
+    return arr.back();
+}
+
+long long int patternsOf(long long int m) {
+    if (patternAcc.size() > m) {
+        return patternAcc[m];
+    }
+    long long int ret = 0;
+    if (m > 0)
+    {
+        ret = patternsOf(m - 1) + patternsOf(m - 2) + patternsOf(m - 3) + patternsOf(m - 4);
+        patternAcc.push_back(ret);
+    }
+    else if (m == 0) {
+        ret = 1;
+        patternAcc.push_back(1);
+    }
+    else
+        ret = 0;
+    return ret;
+}
+
+std::map<std::pair<long long int,long long int>, long long int> allblockMap;
+
+long long int allBlocks(long long int n, long long int m) {
+    if (allblockMap.find({n,m})!=allblockMap.end()) {
+        return allblockMap.at({n,m});
+    }
+    long long int ret = 1;
+    long long int p = patternsOf(m);
+    for (long long int i = 0; i < n; i++) {
+        ret *= p;
+    }
+    allblockMap[{n,m}] = ret;
+    return ret;
+}
+
+std::map<std::pair<long long int,long long int>, long long int> blockMap;
+long long int legoBlocks(long long int n, long long int m) {
+    if (blockMap.find({n,m})!=blockMap.end()) {
+        return blockMap.at({n,m});
+    }
+    long long int result = 0;
+    result = allBlocks(n, m);
+    for (long long int i = 1; i <= m - 1; i++) {
+        result -= legoBlocks(n, i) * allBlocks(n, m - i);
+    }
+    blockMap[{n,m}] = result;
+    return result;
+}
 
 int main() {
-    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
-    std::string result;
-    std::string buf;
-    std::getline(std::cin, buf);
-    int num = 0;
-    std::sscanf(buf.c_str(), "%d", &num);
-    std::vector<std::shared_ptr<CMD>> cmds;
-    while(num-->0) {
-        std::getline(std::cin, buf);
-        switch (buf[0]) {
-            case '1': {
-                buf.erase(0,2);
-                cmds.push_back(std::shared_ptr<CMD>(new Append(buf)));
-                cmds.back()->Do(result);
-                break;
-            }
-            case '2': {
-                buf.erase(0,2);
-                int n = 0;
-                std::sscanf(buf.c_str(), "%d", &n);
-                cmds.push_back(std::shared_ptr<CMD>(new RemoveLast(n)));
-                cmds.back()->Do(result);
-                break;
-            }
-            case '3': {
-                buf.erase(0,2);
-                int n = 0;
-                std::sscanf(buf.c_str(), "%d", &n);
-                std::cout << result[std::min(n - 1, (int)result.size() - 1)] << std::endl;
-                break;
-            }
-            case '4': {
-                cmds.back()->Undo(result);
-                cmds.pop_back();
-                break;
-            }
-        }
-    }
-
+    printf("%d\n", legoBlocks(8,6) % MOD);
+    printf("%d\n", legoBlocks(10,8));
+    printf("%d\n", legoBlocks(7,3));
+    printf("%d\n", legoBlocks(529, 190));
+    printf("%d\n", legoBlocks(4,4));
+    printf("%d\n", legoBlocks(4,5));
+    printf("%d\n", legoBlocks(4,6));
     return 0;
 }
