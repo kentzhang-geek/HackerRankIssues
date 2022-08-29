@@ -1,83 +1,109 @@
 #include "bits/stdc++.h"
-#include <iostream>
-#include <iostream>
-#include <cstddef>
+#include <vector>
 
-class Node {
-public:
-    int data;
-    Node *left;
-    Node *right;
-    Node(int d) {
-        data = d;
-        left = NULL;
-        right = NULL;
-    }
-};
+using namespace std;
 
-class Solution {
+string ltrim(const string &);
+
+string rtrim(const string &);
+
+/*
+ * Complete the 'noPrefix' function below.
+ *
+ * The function accepts STRING_ARRAY words as parameter.
+ */
+// there are abcdefghij 10 choises of child node
+class TreeNode {
 public:
-    Node* insert(Node* root, int data) {
-        if(root == NULL) {
-            return new Node(data);
-        } else {
-            Node* cur;
-            if(data <= root->data) {
-                cur = insert(root->left, data);
-                root->left = cur;
-            } else {
-                cur = insert(root->right, data);
-                root->right = cur;
+    TreeNode() {};
+    bool isLeaf = false;
+    char c = 'a';
+    size_t wordIdx = -1;
+    std::shared_ptr<TreeNode> children[10];
+
+    static size_t mapIndex(char c) { return c - 'a'; };
+    typedef enum {
+        GOODSET = 0,
+        BADSET = 1,
+    } SetType;
+
+    static SetType check(std::shared_ptr<TreeNode> root, std::string word) {
+        TreeNode *ptr = root.get();
+        // search the tree
+        bool hasNew = false;
+        for (char c: word) {
+            if (ptr->isLeaf) {
+                return BADSET;
             }
-
-            return root;
+            if (ptr->children[mapIndex(c)]) {
+                ptr = ptr->children[mapIndex(c)].get();
+            } else {
+                ptr->children[mapIndex(c)] = std::shared_ptr<TreeNode>(new TreeNode());
+                ptr = ptr->children[mapIndex(c)].get();
+                hasNew = true;
+            }
+        }
+        if (hasNew) {
+            ptr->isLeaf = true;
+            return GOODSET;
+        } else {
+            return BADSET;
         }
     }
-
-/* you only have to complete the function given below.
-Node is defined as
-
-class Node {
-    public:
-        int data;
-        Node *left;
-        Node *right;
-        Node(int d) {
-            data = d;
-            left = NULL;
-            right = NULL;
-        }
 };
 
-*/
-
-    void preOrder(Node *root) {
-        std::cout << root->data << " ";
-        if (root->left)
-            preOrder(root->left);
-        if (root->right)
-            preOrder(root->right);
+void noPrefix(vector<string> words) {
+    std::shared_ptr<TreeNode> root(new TreeNode);
+    for (auto w : words) {
+        auto ret = TreeNode::check(root, w);
+        if (ret == TreeNode::BADSET) {
+            std::cout << "BAD SET" << std::endl;
+            std::cout << w << std::endl;
+            return;
+        }
     }
-
-}; //End of Solution
+    std::cout << "GOOD SET" << std::endl;
+    return;
+}
 
 int main() {
+    string n_temp;
+    getline(cin, n_temp);
 
-    Solution myTree;
-    Node* root = NULL;
+    int n = stoi(ltrim(rtrim(n_temp)));
 
-    int t;
-    int data;
+    vector<string> words(n);
 
-    std::cin >> t;
+    for (int i = 0; i < n; i++) {
+        string words_item;
+        getline(cin, words_item);
 
-    while(t-- > 0) {
-        std::cin >> data;
-        root = myTree.insert(root, data);
+        words[i] = words_item;
     }
 
-    myTree.preOrder(root);
+    noPrefix(words);
 
     return 0;
 }
 
+string ltrim(const string &str) {
+    string s(str);
+
+    s.erase(
+            s.begin(),
+            find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace)))
+    );
+
+    return s;
+}
+
+string rtrim(const string &str) {
+    string s(str);
+
+    s.erase(
+            find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
+            s.end()
+    );
+
+    return s;
+}
