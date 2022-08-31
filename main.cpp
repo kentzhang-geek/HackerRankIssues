@@ -17,30 +17,56 @@ string rtrim(const string &);
  *  3. INTEGER_ARRAY endIndices
  */
 
+struct SpliterAndNum {
+    int idx = 0;
+    int numInvPrev = 0;
+    int numInvAfter = 0;
+};
+
 vector<int> numberOfItems(string s, vector<int> startIndices, vector<int> endIndices) {
-    std::string reversedS = s;
-    std::reverse(reversedS.begin(), reversedS.end());
-    std::vector<int> inventoryNumList;
+    // construct a special list
+    std::vector<SpliterAndNum> spliters;
+    int total = 0;
+    int idx = 0;
+    for (char &c : s) {
+        if (c == '|') {
+            SpliterAndNum sp;
+            sp.idx = idx;
+            sp.numInvPrev = total;
+            spliters.push_back(sp);
+        } else if (c == '*') {
+            total++;
+        }
+        idx++;
+    }
+    for (int i = 0; i < spliters.size(); i++) {
+        spliters[i].numInvAfter = total - spliters[i].numInvPrev;
+    }
+    // compute by look through this list
+    std::vector<int> ret;
     for (int i = 0; i < startIndices.size(); i++) {
         int startIdx = startIndices[i] - 1;
         int endIdx = endIndices[i] - 1;
-        int reversedIdx = s.size() - (endIdx + 1);
-        startIdx = s.find('|', startIdx);
-        reversedIdx = reversedS.find('|', reversedIdx);
-        endIdx = s.size() - (reversedIdx + 1);
-        std::cout << startIdx << std::endl;
-        std::cout << endIdx << std::endl;
-        int inventoryNum = 0;
-        if (endIdx > startIdx) {
-            for (int j = startIdx; j <= endIdx; j++) {
-                if (s[j] == '*') {
-                    inventoryNum++;
-                }
+        int prevNum = total;
+        int afterNum = total;
+        for (int j = 0; j < spliters.size(); j++) {
+            SpliterAndNum &sp = spliters[j];
+            if (sp.idx >= startIdx) {
+                prevNum = sp.numInvPrev;
+                break;
             }
         }
-        inventoryNumList.push_back(inventoryNum);
+        for (int j = spliters.size() - 1; j >= 0; j--) {
+            SpliterAndNum &sp = spliters[j];
+            if (sp.idx <= endIdx) {
+                afterNum = sp.numInvAfter;
+                break;
+            }
+        }
+        int num = std::max(0, total - prevNum - afterNum);
+        ret.push_back(num);
     }
-    return inventoryNumList;
+    return ret;
 }
 
 int main()
