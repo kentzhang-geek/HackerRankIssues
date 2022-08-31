@@ -1,87 +1,100 @@
 #include "bits/stdc++.h"
-#include <vector>
 
 using namespace std;
 
 string ltrim(const string &);
-
 string rtrim(const string &);
 
+
+
 /*
- * Complete the 'noPrefix' function below.
+ * Complete the 'numberOfItems' function below.
  *
- * The function accepts STRING_ARRAY words as parameter.
+ * The function is expected to return an INTEGER_ARRAY.
+ * The function accepts following parameters:
+ *  1. STRING s
+ *  2. INTEGER_ARRAY startIndices
+ *  3. INTEGER_ARRAY endIndices
  */
-// there are abcdefghij 10 choises of child node
-class TreeNode {
-public:
-    TreeNode() {};
-    bool isLeaf = false;
-    char c = 'a';
-    size_t wordIdx = -1;
-    std::shared_ptr<TreeNode> children[10];
 
-    static size_t mapIndex(char c) { return c - 'a'; };
-    typedef enum {
-        GOODSET = 0,
-        BADSET = 1,
-    } SetType;
-
-    static SetType check(std::shared_ptr<TreeNode> root, std::string word) {
-        TreeNode *ptr = root.get();
-        // search the tree
-        bool hasNew = false;
-        for (char c: word) {
-            if (ptr->isLeaf) {
-                return BADSET;
-            }
-            if (ptr->children[mapIndex(c)]) {
-                ptr = ptr->children[mapIndex(c)].get();
-            } else {
-                ptr->children[mapIndex(c)] = std::shared_ptr<TreeNode>(new TreeNode());
-                ptr = ptr->children[mapIndex(c)].get();
-                hasNew = true;
+vector<int> numberOfItems(string s, vector<int> startIndices, vector<int> endIndices) {
+    std::string reversedS = s;
+    std::reverse(reversedS.begin(), reversedS.end());
+    std::vector<int> inventoryNumList;
+    for (int i = 0; i < startIndices.size(); i++) {
+        int startIdx = startIndices[i] - 1;
+        int endIdx = endIndices[i] - 1;
+        int reversedIdx = s.size() - (endIdx + 1);
+        startIdx = s.find('|', startIdx);
+        reversedIdx = reversedS.find('|', reversedIdx);
+        endIdx = s.size() - (reversedIdx + 1);
+        std::cout << startIdx << std::endl;
+        std::cout << endIdx << std::endl;
+        int inventoryNum = 0;
+        if (endIdx > startIdx) {
+            for (int j = startIdx; j <= endIdx; j++) {
+                if (s[j] == '*') {
+                    inventoryNum++;
+                }
             }
         }
-        if (hasNew) {
-            ptr->isLeaf = true;
-            return GOODSET;
-        } else {
-            return BADSET;
-        }
+        inventoryNumList.push_back(inventoryNum);
     }
-};
-
-void noPrefix(vector<string> words) {
-    std::shared_ptr<TreeNode> root(new TreeNode);
-    for (auto w : words) {
-        auto ret = TreeNode::check(root, w);
-        if (ret == TreeNode::BADSET) {
-            std::cout << "BAD SET" << std::endl;
-            std::cout << w << std::endl;
-            return;
-        }
-    }
-    std::cout << "GOOD SET" << std::endl;
-    return;
+    return inventoryNumList;
 }
 
-int main() {
-    string n_temp;
-    getline(cin, n_temp);
+int main()
+{
+    ofstream fout(getenv("OUTPUT_PATH"));
 
-    int n = stoi(ltrim(rtrim(n_temp)));
+    string s;
+    getline(cin, s);
 
-    vector<string> words(n);
+    string startIndices_count_temp;
+    getline(cin, startIndices_count_temp);
 
-    for (int i = 0; i < n; i++) {
-        string words_item;
-        getline(cin, words_item);
+    int startIndices_count = stoi(ltrim(rtrim(startIndices_count_temp)));
 
-        words[i] = words_item;
+    vector<int> startIndices(startIndices_count);
+
+    for (int i = 0; i < startIndices_count; i++) {
+        string startIndices_item_temp;
+        getline(cin, startIndices_item_temp);
+
+        int startIndices_item = stoi(ltrim(rtrim(startIndices_item_temp)));
+
+        startIndices[i] = startIndices_item;
     }
 
-    noPrefix(words);
+    string endIndices_count_temp;
+    getline(cin, endIndices_count_temp);
+
+    int endIndices_count = stoi(ltrim(rtrim(endIndices_count_temp)));
+
+    vector<int> endIndices(endIndices_count);
+
+    for (int i = 0; i < endIndices_count; i++) {
+        string endIndices_item_temp;
+        getline(cin, endIndices_item_temp);
+
+        int endIndices_item = stoi(ltrim(rtrim(endIndices_item_temp)));
+
+        endIndices[i] = endIndices_item;
+    }
+
+    vector<int> result = numberOfItems(s, startIndices, endIndices);
+
+    for (int i = 0; i < result.size(); i++) {
+        fout << result[i];
+
+        if (i != result.size() - 1) {
+            fout << "\n";
+        }
+    }
+
+    fout << "\n";
+
+    fout.close();
 
     return 0;
 }
