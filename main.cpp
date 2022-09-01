@@ -8,64 +8,43 @@ string rtrim(const string &);
 
 
 /*
- * Complete the 'numberOfItems' function below.
+ * Complete the 'processLogs' function below.
  *
- * The function is expected to return an INTEGER_ARRAY.
+ * The function is expected to return a STRING_ARRAY.
  * The function accepts following parameters:
- *  1. STRING s
- *  2. INTEGER_ARRAY startIndices
- *  3. INTEGER_ARRAY endIndices
+ *  1. STRING_ARRAY logs
+ *  2. INTEGER threshold
  */
+bool useridComparator(std::string &a, std::string &b) {
+    return std::stoi(a) < std::stoi(b);
+}
 
-struct SpliterAndNum {
-    int idx = 0;
-    int numInvPrev = 0;
-    int numInvAfter = 0;
-};
-
-vector<int> numberOfItems(string s, vector<int> startIndices, vector<int> endIndices) {
-    // construct a special list
-    std::vector<SpliterAndNum> spliters;
-    int total = 0;
-    int idx = 0;
-    for (char &c : s) {
-        if (c == '|') {
-            SpliterAndNum sp;
-            sp.idx = idx;
-            sp.numInvPrev = total;
-            spliters.push_back(sp);
-        } else if (c == '*') {
-            total++;
+vector<string> processLogs(vector<string> logs, int threshold) {
+    std::map<string, int> userTransactionMap;
+    for (std::string & s : logs) {
+        std::string sender;
+        std::string recipient;
+        sender.resize(12);
+        recipient.resize(12);
+        std::sscanf(s.c_str(), "%s %s ", sender.c_str(), recipient.c_str());
+        if (userTransactionMap.find(sender) == userTransactionMap.end()) {
+            userTransactionMap[sender] = 0;
         }
-        idx++;
-    }
-    for (int i = 0; i < spliters.size(); i++) {
-        spliters[i].numInvAfter = total - spliters[i].numInvPrev;
-    }
-    // compute by look through this list
-    std::vector<int> ret;
-    for (int i = 0; i < startIndices.size(); i++) {
-        int startIdx = startIndices[i] - 1;
-        int endIdx = endIndices[i] - 1;
-        int prevNum = total;
-        int afterNum = total;
-        for (int j = 0; j < spliters.size(); j++) {
-            SpliterAndNum &sp = spliters[j];
-            if (sp.idx >= startIdx) {
-                prevNum = sp.numInvPrev;
-                break;
-            }
+        if (userTransactionMap.find(recipient) == userTransactionMap.end()) {
+            userTransactionMap[recipient] = 0;
         }
-        for (int j = spliters.size() - 1; j >= 0; j--) {
-            SpliterAndNum &sp = spliters[j];
-            if (sp.idx <= endIdx) {
-                afterNum = sp.numInvAfter;
-                break;
-            }
+        userTransactionMap[sender] += 1;
+        if (sender != recipient) {
+            userTransactionMap[recipient] += 1;
         }
-        int num = std::max(0, total - prevNum - afterNum);
-        ret.push_back(num);
     }
+    std::vector<std::string> ret;
+    for (auto kvpair : userTransactionMap) {
+        if (kvpair.second >= threshold) {
+            ret.push_back(kvpair.first);
+        }
+    }
+    std::sort(ret.begin(), ret.end(), useridComparator);
     return ret;
 }
 
@@ -73,42 +52,26 @@ int main()
 {
     ofstream fout(getenv("OUTPUT_PATH"));
 
-    string s;
-    getline(cin, s);
+    string logs_count_temp;
+    getline(cin, logs_count_temp);
 
-    string startIndices_count_temp;
-    getline(cin, startIndices_count_temp);
+    int logs_count = stoi(ltrim(rtrim(logs_count_temp)));
 
-    int startIndices_count = stoi(ltrim(rtrim(startIndices_count_temp)));
+    vector<string> logs(logs_count);
 
-    vector<int> startIndices(startIndices_count);
+    for (int i = 0; i < logs_count; i++) {
+        string logs_item;
+        getline(cin, logs_item);
 
-    for (int i = 0; i < startIndices_count; i++) {
-        string startIndices_item_temp;
-        getline(cin, startIndices_item_temp);
-
-        int startIndices_item = stoi(ltrim(rtrim(startIndices_item_temp)));
-
-        startIndices[i] = startIndices_item;
+        logs[i] = logs_item;
     }
 
-    string endIndices_count_temp;
-    getline(cin, endIndices_count_temp);
+    string threshold_temp;
+    getline(cin, threshold_temp);
 
-    int endIndices_count = stoi(ltrim(rtrim(endIndices_count_temp)));
+    int threshold = stoi(ltrim(rtrim(threshold_temp)));
 
-    vector<int> endIndices(endIndices_count);
-
-    for (int i = 0; i < endIndices_count; i++) {
-        string endIndices_item_temp;
-        getline(cin, endIndices_item_temp);
-
-        int endIndices_item = stoi(ltrim(rtrim(endIndices_item_temp)));
-
-        endIndices[i] = endIndices_item;
-    }
-
-    vector<int> result = numberOfItems(s, startIndices, endIndices);
+    vector<string> result = processLogs(logs, threshold);
 
     for (int i = 0; i < result.size(); i++) {
         fout << result[i];
