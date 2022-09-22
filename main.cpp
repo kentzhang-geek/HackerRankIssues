@@ -1,4 +1,4 @@
-#include "bits/stdc++.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -7,52 +7,40 @@ string rtrim(const string &);
 vector<string> split(const string &);
 
 /*
- * Complete the 'plusMinus' function below.
+ * Complete the 'miniMaxSum' function below.
  *
  * The function accepts INTEGER_ARRAY arr as parameter.
  */
 
-void plusMinus(vector<int> arr) {
-    int numPos = 0;
-    int numNeg = 0;
-    int numZero = 0;
-    int totalNum = 0;
-    for (int &num : arr) {
-        totalNum++;
-        if (num == 0) {
-            numZero++;
-        } else if (num > 0) {
-            numPos++;
-        } else {
-            numNeg++;
-        }
+void miniMaxSum(vector<int> arr) {
+    long long maxNum = arr[0];
+    long long minNum = arr[0];
+    long long sum = 0;
+    for (int &num:arr) {
+        maxNum = max(maxNum, (long long)num);
+        minNum = min(minNum, (long long)num);
+        sum += num;
     }
-    printf("%.6f\n", static_cast<float>(numPos) / static_cast<float>(totalNum));
-    printf("%.6f\n", static_cast<float>(numNeg) / static_cast<float>(totalNum));
-    printf("%.6f\n", static_cast<float>(numZero) / static_cast<float>(totalNum));
+    printf("%ld %ld\n", sum - maxNum, sum - minNum);
 }
 
 int main()
 {
-    string n_temp;
-    getline(cin, n_temp);
-
-    int n = stoi(ltrim(rtrim(n_temp)));
 
     string arr_temp_temp;
     getline(cin, arr_temp_temp);
 
     vector<string> arr_temp = split(rtrim(arr_temp_temp));
 
-    vector<int> arr(n);
+    vector<int> arr(5);
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < 5; i++) {
         int arr_item = stoi(arr_temp[i]);
 
         arr[i] = arr_item;
     }
 
-    plusMinus(arr);
+    miniMaxSum(arr);
 
     return 0;
 }
@@ -95,4 +83,3 @@ vector<string> split(const string &str) {
 
     return tokens;
 }
-
