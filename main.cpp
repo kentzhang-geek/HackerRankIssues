@@ -4,86 +4,55 @@ using namespace std;
 
 string ltrim(const string &);
 string rtrim(const string &);
-
-
+vector<string> split(const string &);
 
 /*
- * Complete the 'processLogs' function below.
+ * Complete the 'plusMinus' function below.
  *
- * The function is expected to return a STRING_ARRAY.
- * The function accepts following parameters:
- *  1. STRING_ARRAY logs
- *  2. INTEGER threshold
+ * The function accepts INTEGER_ARRAY arr as parameter.
  */
-bool useridComparator(std::string &a, std::string &b) {
-    return std::stoi(a) < std::stoi(b);
-}
 
-vector<string> processLogs(vector<string> logs, int threshold) {
-    std::map<string, int> userTransactionMap;
-    for (std::string & s : logs) {
-        std::string sender;
-        std::string recipient;
-        sender.resize(12);
-        recipient.resize(12);
-        std::sscanf(s.c_str(), "%s %s ", sender.c_str(), recipient.c_str());
-        if (userTransactionMap.find(sender) == userTransactionMap.end()) {
-            userTransactionMap[sender] = 0;
-        }
-        if (userTransactionMap.find(recipient) == userTransactionMap.end()) {
-            userTransactionMap[recipient] = 0;
-        }
-        userTransactionMap[sender] += 1;
-        if (sender != recipient) {
-            userTransactionMap[recipient] += 1;
+void plusMinus(vector<int> arr) {
+    int numPos = 0;
+    int numNeg = 0;
+    int numZero = 0;
+    int totalNum = 0;
+    for (int &num : arr) {
+        totalNum++;
+        if (num == 0) {
+            numZero++;
+        } else if (num > 0) {
+            numPos++;
+        } else {
+            numNeg++;
         }
     }
-    std::vector<std::string> ret;
-    for (auto kvpair : userTransactionMap) {
-        if (kvpair.second >= threshold) {
-            ret.push_back(kvpair.first);
-        }
-    }
-    std::sort(ret.begin(), ret.end(), useridComparator);
-    return ret;
+    printf("%.6f\n", static_cast<float>(numPos) / static_cast<float>(totalNum));
+    printf("%.6f\n", static_cast<float>(numNeg) / static_cast<float>(totalNum));
+    printf("%.6f\n", static_cast<float>(numZero) / static_cast<float>(totalNum));
 }
 
 int main()
 {
-    ofstream fout(getenv("OUTPUT_PATH"));
+    string n_temp;
+    getline(cin, n_temp);
 
-    string logs_count_temp;
-    getline(cin, logs_count_temp);
+    int n = stoi(ltrim(rtrim(n_temp)));
 
-    int logs_count = stoi(ltrim(rtrim(logs_count_temp)));
+    string arr_temp_temp;
+    getline(cin, arr_temp_temp);
 
-    vector<string> logs(logs_count);
+    vector<string> arr_temp = split(rtrim(arr_temp_temp));
 
-    for (int i = 0; i < logs_count; i++) {
-        string logs_item;
-        getline(cin, logs_item);
+    vector<int> arr(n);
 
-        logs[i] = logs_item;
+    for (int i = 0; i < n; i++) {
+        int arr_item = stoi(arr_temp[i]);
+
+        arr[i] = arr_item;
     }
 
-    string threshold_temp;
-    getline(cin, threshold_temp);
-
-    int threshold = stoi(ltrim(rtrim(threshold_temp)));
-
-    vector<string> result = processLogs(logs, threshold);
-
-    for (int i = 0; i < result.size(); i++) {
-        fout << result[i];
-
-        if (i != result.size() - 1) {
-            fout << "\n";
-        }
-    }
-
-    fout << "\n";
-
-    fout.close();
+    plusMinus(arr);
 
     return 0;
 }
@@ -109,3 +78,21 @@ string rtrim(const string &str) {
 
     return s;
 }
+
+vector<string> split(const string &str) {
+    vector<string> tokens;
+
+    string::size_type start = 0;
+    string::size_type end = 0;
+
+    while ((end = str.find(" ", start)) != string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+
+        start = end + 1;
+    }
+
+    tokens.push_back(str.substr(start));
+
+    return tokens;
+}
+
