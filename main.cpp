@@ -7,103 +7,101 @@ string rtrim(const string &);
 vector<string> split(const string &);
 
 /*
- * Complete the 'waiter' function below.
+ * Complete the 'climbingLeaderboard' function below.
  *
  * The function is expected to return an INTEGER_ARRAY.
  * The function accepts following parameters:
- *  1. INTEGER_ARRAY number
- *  2. INTEGER q
+ *  1. INTEGER_ARRAY ranked
+ *  2. INTEGER_ARRAY player
  */
-void computePrimaryNumbers(std::vector<int> &pnums, int round) {
-    int current_num = 2;
-    while (pnums.size() < round) {
-        if (current_num > 2) {
-            int sqrt_current = static_cast<int>(std::sqrt(current_num));
-            bool is_primary = true;
-            for (int factor = 2; factor <= sqrt_current; factor++) {
-                if (current_num % factor == 0) {
-                    is_primary = false;
-                    break;
-                }
-            }
-            if (is_primary) {
-                pnums.push_back(current_num);
-            }
-        } else {
-            pnums.push_back(current_num);
-        }
-        current_num++;
+int binarySearch(vector<int> &ranked, int player) {
+    int left = 0;
+    int right = ranked.size() - 1;
+    if (player >= ranked[left])
+        return left;
+    if (player < ranked[right]) {
+        return right + 1;
     }
+    while ((right - left) > 1) {
+        int mid = (left + right) / 2;
+        if (ranked[mid] < player) {
+            right = mid;
+        } else if (ranked[mid] > player) {
+            left = mid;
+        } else {
+            return mid;
+        }
+    }
+    return right;
 }
 
-vector<int> waiter(vector<int> number, int q) {
-    std::vector<int> primary_nums;
-    std::vector<int> results;
-    computePrimaryNumbers(primary_nums, q);
-    std::reverse(number.begin(), number.end());
-    std::vector<int> StackA;
-    std::vector<int> StackB;
-    for (int i = 0; i < q; i++) {
-        for (int & num: number) {
-            if (num % primary_nums[i] == 0) {
-                StackB.push_back(num);
-            } else {
-                StackA.push_back(num);
-            }
+vector<int> climbingLeaderboard(vector<int> ranked, vector<int> player) {
+    std::vector<int> rank_num;
+    for (int & r : ranked) {
+        if (rank_num.empty()) {
+            rank_num.push_back(r);
+        } else if (rank_num.back() != r) {
+            rank_num.push_back(r);
         }
-        number = StackA;
-        std::reverse(number.begin(), number.end());
-        StackA.clear();
-        while(!StackB.empty()) {
-            results.push_back(StackB.back());
-            StackB.pop_back();
-        }
-        if (number.empty())
-            break;
     }
-    for (int &num:number) {
-        results.push_back(num);
+    std::vector<int> ret;
+    for (int & p: player) {
+        ret.push_back(binarySearch(rank_num, p) + 1);
     }
-    return results;
+    return ret;
 }
 
 int main()
 {
-    ofstream fout(getenv("OUTPUT_PATH"));
+    ofstream fout("test.txt");
 
-    string first_multiple_input_temp;
-    getline(cin, first_multiple_input_temp);
+    string ranked_count_temp;
+    getline(cin, ranked_count_temp);
 
-    vector<string> first_multiple_input = split(rtrim(first_multiple_input_temp));
+    int ranked_count = stoi(ltrim(rtrim(ranked_count_temp)));
 
-    int n = stoi(first_multiple_input[0]);
+    string ranked_temp_temp;
+    getline(cin, ranked_temp_temp);
 
-    int q = stoi(first_multiple_input[1]);
+    vector<string> ranked_temp = split(rtrim(ranked_temp_temp));
 
-    string number_temp_temp;
-    getline(cin, number_temp_temp);
+    vector<int> ranked(ranked_count);
 
-    vector<string> number_temp = split(rtrim(number_temp_temp));
+    for (int i = 0; i < ranked_count; i++) {
+        int ranked_item = stoi(ranked_temp[i]);
 
-    vector<int> number(n);
-
-    for (int i = 0; i < n; i++) {
-        int number_item = stoi(number_temp[i]);
-
-        number[i] = number_item;
+        ranked[i] = ranked_item;
     }
 
-    vector<int> result = waiter(number, q);
+    string player_count_temp;
+    getline(cin, player_count_temp);
+
+    int player_count = stoi(ltrim(rtrim(player_count_temp)));
+
+    string player_temp_temp;
+    getline(cin, player_temp_temp);
+
+    vector<string> player_temp = split(rtrim(player_temp_temp));
+
+    vector<int> player(player_count);
+
+    for (int i = 0; i < player_count; i++) {
+        int player_item = stoi(player_temp[i]);
+
+        player[i] = player_item;
+    }
+
+    vector<int> result = climbingLeaderboard(ranked, player);
 
     for (size_t i = 0; i < result.size(); i++) {
-        std::cout << result[i];
+        fout << result[i];
 
         if (i != result.size() - 1) {
-            std::cout << "\n";
+            fout << "\n";
         }
     }
 
-    std::cout << "\n";
+    fout << "\n";
 
     fout.close();
 
